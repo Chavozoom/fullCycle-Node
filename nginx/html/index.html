@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Full Cycle</title>
+</head>
+
+<body>
+    <h1>Full Cycle Rocks!</h1>
+    <h4>- Lista de nomes cadastrada no banco de dados:</h4>
+    <div id="namesList"></div>
+
+    <form id="nameForm">
+        <input type="text" id="nameInput" placeholder="Digite um nome" />
+        <button type="submit">Salvar</button>
+    </form>
+
+    <script>
+        const namesList = document.getElementById("namesList");
+        const nameForm = document.getElementById("nameForm");
+        const nameInput = document.getElementById("nameInput");
+
+        // Função para buscar dados da API
+        function getPeople() {
+            fetch("/people")
+                .then((response) => response.json())
+                .then((data) => {
+                    const names = data.map((person) => person.name);
+                    namesList.innerHTML = names.join("<br>");
+                })
+                .catch((error) => {
+                    console.error("Erro ao buscar dados:", error);
+                });
+        }
+
+        // Função para enviar um nome para a API
+        function saveName() {
+            const name = nameInput.value;
+            fetch("/people", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ name }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data.message);
+                    getPeople(); // Atualiza a lista de nomes após a inserção
+                })
+                .catch((error) => {
+                    console.error("Erro ao salvar nome:", error);
+                });
+        }
+
+        // Chama a função quando a página é carregada
+        window.onload = () => {
+            getPeople();
+            nameForm.addEventListener("submit", (event) => {
+                event.preventDefault();
+                saveName();
+                nameInput.value = ""; // Limpa o input após o envio
+            });
+        };
+    </script>
+</body>
+
+</html>

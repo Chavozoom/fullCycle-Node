@@ -1,0 +1,47 @@
+version: "3"
+
+services:
+  nginx:
+    build:
+      context: nginx
+      dockerfile: Dockerfile
+    image: chavozoom/nginx
+    container_name: nginx
+    networks:
+      - nodenet
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
+
+  db:
+    image: mysql:5.7
+    container_name: db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: nodedb
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - nodenet
+
+  app:
+    build:
+      context: node
+      dockerfile: Dockerfile
+    image: chavozoom/node
+    container_name: app
+    networks:
+      - nodenet
+    volumes:
+      - ./node:/app
+    tty: true
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+networks:
+  nodenet:
+    driver: bridge
